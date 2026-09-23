@@ -1,81 +1,801 @@
-<link href="//maxcdn.bootstrapcdn.com/bootstrap/4.1.1/css/bootstrap.min.css" rel="stylesheet" id="bootstrap-css">
-<script src="//maxcdn.bootstrapcdn.com/bootstrap/4.1.1/js/bootstrap.min.js"></script>
-<script src="//cdnjs.cloudflare.com/ajax/libs/jquery/3.2.1/jquery.min.js"></script>
 
 <!DOCTYPE html>
-<html>
-	<head>
-		<title>Chatbot</title>
-		<link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.1.3/css/bootstrap.min.css" integrity="sha384-MCw98/SFnGE8fJT3GXwEOngsV7Zt27NXFoaoApmYm81iuXoPkFOJwJ8ERdknLPMO" crossorigin="anonymous">
-		<link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.5.0/css/all.css" integrity="sha384-B4dIYHKNBt8Bc12p+WXckhzcICo0wtJAoU8YZTY5qE0Id1GSseTk6S+L3BlXeVIU" crossorigin="anonymous">
-		<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
-		<link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='style.css')}}"/>
-	</head>
-	
-	
-	<body>
-		<div class="container-fluid h-100">
-			<div class="row justify-content-center h-100">		
-				<div class="col-md-8 col-xl-6 chat">
-					<div class="card">
-						<div class="card-header msg_head">
-							<div class="d-flex bd-highlight">
-								<div class="img_cont">
-									<img src="https://cdn-icons-png.flaticon.com/512/387/387569.png" class="rounded-circle user_img">
-									<!-- <img src="https://www.prdistribution.com/spirit/uploads/pressreleases/2019/newsreleases/d83341deb75c4c4f6b113f27b1e42cd8-chatbot-florence-already-helps-thousands-of-patients-to-remember-their-medication.png" class="rounded-circle user_img"> -->
-									<span class="online_icon"></span>
-								</div>
-								<div class="user_info">
-									<span>Medical Chatbot</span>
-									<p>Ask me anything!</p>
-								</div>
-							</div>
-						</div>
-						<div id="messageFormeight" class="card-body msg_card_body">
-							
-							
-						</div>
-						<div class="card-footer">
-							<form id="messageArea" class="input-group">
-                                <input type="text" id="text" name="msg" placeholder="Type your message..." autocomplete="off" class="form-control type_msg" required/>
-								<div class="input-group-append">
-									<button type="submit" id="send" class="input-group-text send_btn"><i class="fas fa-location-arrow"></i></button>
-								</div>
-							</form>
-						</div>
-					</div>
-				</div>
-			</div>
-		</div>
-		
-		<script>
-			$(document).ready(function() {
-				$("#messageArea").on("submit", function(event) {
-					const date = new Date();
-					const hour = date.getHours();
-					const minute = date.getMinutes();
-					const str_time = hour+":"+minute;
-					var rawText = $("#text").val();
+<html lang="en">
 
-					var userHtml = '<div class="d-flex justify-content-end mb-4"><div class="msg_cotainer_send">' + rawText + '<span class="msg_time_send">'+ str_time + '</span></div><div class="img_cont_msg"><img src="https://i.ibb.co/d5b84Xw/Untitled-design.png" class="rounded-circle user_img_msg"></div></div>';
-					
-					$("#text").val("");
-					$("#messageFormeight").append(userHtml);
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-					$.ajax({
-						data: {
-							msg: rawText,	
-						},
-						type: "POST",
-						url: "/get",
-					}).done(function(data) {
-						var botHtml = '<div class="d-flex justify-content-start mb-4"><div class="img_cont_msg"><img src="https://cdn-icons-png.flaticon.com/512/387/387569.png" class="rounded-circle user_img_msg"></div><div class="msg_cotainer">' + data + '<span class="msg_time">' + str_time + '</span></div></div>';
-						$("#messageFormeight").append($.parseHTML(botHtml));
-					});
-					event.preventDefault();
-				});
-			});
-		</script>
-        
-    </body>
+    <title>MedStudy AI</title>
+
+    <!-- Bootstrap -->
+    <link rel="stylesheet"
+          href="https://stackpath.bootstrapcdn.com/bootstrap/4.1.3/css/bootstrap.min.css">
+
+    <!-- Font Awesome -->
+    <link rel="stylesheet"
+          href="https://use.fontawesome.com/releases/v5.5.0/css/all.css">
+
+    <!-- Google Font -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap"
+          rel="stylesheet">
+
+    <style>
+
+        * {
+            box-sizing: border-box;
+        }
+
+        body {
+            margin: 0;
+            font-family: 'Inter', sans-serif;
+            background: #f4f7fb;
+            height: 100vh;
+        }
+
+        .chat-wrapper {
+            height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+        }
+
+        .chat-card {
+            width: 100%;
+            max-width: 950px;
+            height: 92vh;
+            background: white;
+            border-radius: 22px;
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+            box-shadow: 0 10px 40px rgba(30, 60, 90, 0.12);
+        }
+
+        /* ================= HEADER ================= */
+
+        .chat-header {
+            background: linear-gradient(135deg, #2563eb, #4f46e5);
+            color: white;
+            padding: 18px 25px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        .bot-profile {
+            display: flex;
+            align-items: center;
+        }
+
+        .bot-avatar {
+            width: 52px;
+            height: 52px;
+            border-radius: 50%;
+            background: white;
+            padding: 5px;
+            margin-right: 14px;
+        }
+
+        .bot-title {
+            font-size: 19px;
+            font-weight: 700;
+            margin: 0;
+        }
+
+        .bot-subtitle {
+            font-size: 13px;
+            opacity: 0.9;
+            margin-top: 3px;
+        }
+
+        .online-dot {
+            display: inline-block;
+            width: 8px;
+            height: 8px;
+            background: #22c55e;
+            border-radius: 50%;
+            margin-right: 5px;
+        }
+
+        .clear-btn {
+            border: none;
+            background: rgba(255,255,255,0.15);
+            color: white;
+            border-radius: 10px;
+            padding: 9px 12px;
+            cursor: pointer;
+            transition: 0.2s;
+        }
+
+        .clear-btn:hover {
+            background: rgba(255,255,255,0.25);
+        }
+
+        /* ================= CHAT BODY ================= */
+
+        .chat-body {
+            flex: 1;
+            overflow-y: auto;
+            padding: 25px;
+            background: #f8fafc;
+        }
+
+        .welcome-section {
+            text-align: center;
+            max-width: 600px;
+            margin: 25px auto 30px;
+        }
+
+        .welcome-icon {
+            width: 65px;
+            height: 65px;
+            border-radius: 18px;
+            background: #e0e7ff;
+            color: #4338ca;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: auto;
+            font-size: 28px;
+        }
+
+        .welcome-title {
+            font-size: 24px;
+            font-weight: 700;
+            margin-top: 15px;
+            color: #172033;
+        }
+
+        .welcome-text {
+            color: #64748b;
+            font-size: 14px;
+            line-height: 1.6;
+        }
+
+        /* ================= SUGGESTIONS ================= */
+
+        .suggestions {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: center;
+            gap: 10px;
+            margin-top: 20px;
+        }
+
+        .suggestion-btn {
+            background: white;
+            border: 1px solid #dbe3ef;
+            color: #334155;
+            border-radius: 12px;
+            padding: 10px 15px;
+            font-size: 13px;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .suggestion-btn:hover {
+            border-color: #6366f1;
+            color: #4f46e5;
+            background: #eef2ff;
+        }
+
+        /* ================= MESSAGES ================= */
+
+        .message-row {
+            display: flex;
+            margin-bottom: 18px;
+            animation: fadeIn 0.25s ease;
+        }
+
+        .message-row.user {
+            justify-content: flex-end;
+        }
+
+        .message-avatar {
+            width: 36px;
+            height: 36px;
+            border-radius: 50%;
+            margin-right: 10px;
+        }
+
+        .message-row.user .message-avatar {
+            margin-left: 10px;
+            margin-right: 0;
+        }
+
+        .message {
+            max-width: 70%;
+            padding: 13px 16px;
+            border-radius: 16px;
+            font-size: 14px;
+            line-height: 1.55;
+            position: relative;
+        }
+
+        .bot-message {
+            background: white;
+            color: #334155;
+            border: 1px solid #e5e7eb;
+            border-top-left-radius: 4px;
+        }
+
+        .user-message {
+            background: #4f46e5;
+            color: white;
+            border-top-right-radius: 4px;
+        }
+
+        .message-time {
+            display: block;
+            font-size: 10px;
+            margin-top: 6px;
+            opacity: 0.55;
+        }
+
+        /* ================= TYPING ================= */
+
+        .typing {
+            display: none;
+            align-items: center;
+            margin-bottom: 15px;
+        }
+
+        .typing img {
+            width: 35px;
+            height: 35px;
+            margin-right: 10px;
+        }
+
+        .typing-bubble {
+            background: white;
+            padding: 12px 16px;
+            border-radius: 15px;
+            border: 1px solid #e5e7eb;
+        }
+
+        .typing-dot {
+            display: inline-block;
+            width: 7px;
+            height: 7px;
+            background: #94a3b8;
+            border-radius: 50%;
+            margin: 0 2px;
+            animation: typing 1.3s infinite;
+        }
+
+        .typing-dot:nth-child(2) {
+            animation-delay: 0.2s;
+        }
+
+        .typing-dot:nth-child(3) {
+            animation-delay: 0.4s;
+        }
+
+        @keyframes typing {
+            0%, 60%, 100% {
+                transform: translateY(0);
+            }
+
+            30% {
+                transform: translateY(-5px);
+            }
+        }
+
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(5px);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        /* ================= INPUT ================= */
+
+        .chat-footer {
+            background: white;
+            border-top: 1px solid #e5e7eb;
+            padding: 15px 20px;
+        }
+
+        .input-wrapper {
+            display: flex;
+            align-items: center;
+            background: #f1f5f9;
+            border-radius: 15px;
+            padding: 5px;
+        }
+
+        #text {
+            border: none;
+            outline: none;
+            background: transparent;
+            flex: 1;
+            padding: 12px 14px;
+            font-size: 14px;
+        }
+
+        #text:focus {
+            box-shadow: none;
+        }
+
+        .send-btn {
+            width: 45px;
+            height: 45px;
+            border: none;
+            border-radius: 12px;
+            background: #4f46e5;
+            color: white;
+            cursor: pointer;
+            transition: 0.2s;
+        }
+
+        .send-btn:hover {
+            background: #4338ca;
+            transform: translateY(-1px);
+        }
+
+        .disclaimer {
+            text-align: center;
+            font-size: 10px;
+            color: #94a3b8;
+            margin-top: 8px;
+        }
+
+        /* ================= MOBILE ================= */
+
+        @media (max-width: 768px) {
+
+            .chat-wrapper {
+                padding: 0;
+            }
+
+            .chat-card {
+                height: 100vh;
+                border-radius: 0;
+            }
+
+            .chat-header {
+                padding: 15px;
+            }
+
+            .chat-body {
+                padding: 15px;
+            }
+
+            .message {
+                max-width: 85%;
+            }
+
+            .welcome-title {
+                font-size: 21px;
+            }
+
+            .suggestions {
+                justify-content: flex-start;
+            }
+
+            .suggestion-btn {
+                font-size: 12px;
+            }
+        }
+
+    </style>
+</head>
+
+<body>
+
+<div class="chat-wrapper">
+
+    <div class="chat-card">
+
+        <!-- ================= HEADER ================= -->
+
+        <div class="chat-header">
+
+            <div class="bot-profile">
+
+                <img
+                    src="https://cdn-icons-png.flaticon.com/512/387/387569.png"
+                    class="bot-avatar"
+                    alt="AI">
+
+                <div>
+                    <div class="bot-title">
+                        MedStudy AI
+                    </div>
+
+                    <div class="bot-subtitle">
+                        <span class="online-dot"></span>
+                        AI Study Assistant
+                    </div>
+                </div>
+
+            </div>
+
+            <button class="clear-btn" id="clearChat" title="Clear chat">
+                <i class="fas fa-trash"></i>
+            </button>
+
+        </div>
+
+
+        <!-- ================= CHAT BODY ================= -->
+
+        <div id="messageFormeight" class="chat-body">
+
+            <!-- Welcome -->
+
+            <div class="welcome-section" id="welcomeSection">
+
+                <div class="welcome-icon">
+                    <i class="fas fa-graduation-cap"></i>
+                </div>
+
+                <div class="welcome-title">
+                    Hey! 👋 Ready to study?
+                </div>
+
+                <div class="welcome-text">
+                    I'm your AI study assistant. Ask questions,
+                    understand difficult concepts, revise topics,
+                    or prepare for your exams.
+                </div>
+
+                <!-- Suggested questions -->
+
+                <div class="suggestions">
+
+                    <button class="suggestion-btn"
+                            onclick="askQuestion('Explain the cardiac cycle')">
+                        🫀 Cardiac Cycle
+                    </button>
+
+                    <button class="suggestion-btn"
+                            onclick="askQuestion('Explain the mechanism of action of antibiotics')">
+                        💊 Antibiotics
+                    </button>
+
+                    <button class="suggestion-btn"
+                            onclick="askQuestion('Explain renal physiology')">
+                        🧪 Renal Physiology
+                    </button>
+
+                    <button class="suggestion-btn"
+                            onclick="askQuestion('Give me 10 important exam questions')">
+                        📝 Exam Questions
+                    </button>
+
+                </div>
+
+            </div>
+
+
+            <!-- Typing indicator -->
+
+            <div class="typing" id="typingIndicator">
+
+                <img
+                    src="https://cdn-icons-png.flaticon.com/512/387/387569.png">
+
+                <div class="typing-bubble">
+
+                    <span class="typing-dot"></span>
+                    <span class="typing-dot"></span>
+                    <span class="typing-dot"></span>
+
+                </div>
+
+            </div>
+
+        </div>
+
+
+        <!-- ================= FOOTER ================= -->
+
+        <div class="chat-footer">
+
+            <form id="messageArea">
+
+                <div class="input-wrapper">
+
+                    <input
+                        type="text"
+                        id="text"
+                        name="msg"
+                        placeholder="Ask a medical or study question..."
+                        autocomplete="off"
+                        required>
+
+                    <button
+                        type="submit"
+                        id="send"
+                        class="send-btn">
+
+                        <i class="fas fa-paper-plane"></i>
+
+                    </button>
+
+                </div>
+
+            </form>
+
+            <div class="disclaimer">
+                AI-generated responses may contain mistakes.
+                Always verify important medical information.
+            </div>
+
+        </div>
+
+    </div>
+
+</div>
+
+
+<script>
+
+$(document).ready(function () {
+
+    $("#messageArea").on("submit", function (event) {
+
+        event.preventDefault();
+
+        sendMessage();
+
+    });
+
+
+    /* ================= SEND MESSAGE ================= */
+
+    function sendMessage() {
+
+        var rawText = $("#text").val().trim();
+
+        if (!rawText) {
+            return;
+        }
+
+        var time = getTime();
+
+        /* Hide welcome screen */
+
+        $("#welcomeSection").hide();
+
+
+        /* User message */
+
+        var userHtml = `
+            <div class="message-row user">
+
+                <div class="message user-message">
+
+                    ${escapeHtml(rawText)}
+
+                    <span class="message-time">
+                        ${time}
+                    </span>
+
+                </div>
+
+                <img
+                    src="https://i.ibb.co/d5b84Xw/Untitled-design.png"
+                    class="message-avatar">
+
+            </div>
+        `;
+
+        $("#messageFormeight").append(userHtml);
+
+        $("#text").val("");
+
+        scrollToBottom();
+
+
+        /* Show typing */
+
+        $("#typingIndicator").css("display", "flex");
+
+        scrollToBottom();
+
+
+        /* API request */
+
+        $.ajax({
+
+            data: {
+                msg: rawText
+            },
+
+            type: "POST",
+
+            url: "/get"
+
+        })
+
+        .done(function (data) {
+
+            $("#typingIndicator").hide();
+
+            var botHtml = `
+                <div class="message-row">
+
+                    <img
+                        src="https://cdn-icons-png.flaticon.com/512/387/387569.png"
+                        class="message-avatar">
+
+                    <div class="message bot-message">
+
+                        ${data}
+
+                        <span class="message-time">
+                            ${getTime()}
+                        </span>
+
+                    </div>
+
+                </div>
+            `;
+
+            $("#messageFormeight").append(botHtml);
+
+            scrollToBottom();
+
+        })
+
+        .fail(function () {
+
+            $("#typingIndicator").hide();
+
+            var errorHtml = `
+                <div class="message-row">
+
+                    <img
+                        src="https://cdn-icons-png.flaticon.com/512/387/387569.png"
+                        class="message-avatar">
+
+                    <div class="message bot-message">
+
+                        Sorry, something went wrong.
+                        Please try again.
+
+                        <span class="message-time">
+                            ${getTime()}
+                        </span>
+
+                    </div>
+
+                </div>
+            `;
+
+            $("#messageFormeight").append(errorHtml);
+
+            scrollToBottom();
+
+        });
+
+    }
+
+
+    /* ================= SUGGESTION QUESTION ================= */
+
+    window.askQuestion = function (question) {
+
+        $("#text").val(question);
+
+        sendMessage();
+
+    };
+
+
+    /* ================= CLEAR CHAT ================= */
+
+    $("#clearChat").click(function () {
+
+        $("#messageFormeight").html(`
+            <div class="welcome-section" id="welcomeSection">
+
+                <div class="welcome-icon">
+                    <i class="fas fa-graduation-cap"></i>
+                </div>
+
+                <div class="welcome-title">
+                    Hey! 👋 Ready to study?
+                </div>
+
+                <div class="welcome-text">
+                    I'm your AI study assistant. Ask questions,
+                    understand difficult concepts, revise topics,
+                    or prepare for your exams.
+                </div>
+
+                <div class="suggestions">
+
+                    <button class="suggestion-btn"
+                            onclick="askQuestion('Explain the cardiac cycle')">
+                        🫀 Cardiac Cycle
+                    </button>
+
+                    <button class="suggestion-btn"
+                            onclick="askQuestion('Explain renal physiology')">
+                        🧪 Renal Physiology
+                    </button>
+
+                    <button class="suggestion-btn"
+                            onclick="askQuestion('Give me 10 important exam questions')">
+                        📝 Exam Questions
+                    </button>
+
+                </div>
+
+            </div>
+
+            <div class="typing" id="typingIndicator">
+
+                <img src="https://cdn-icons-png.flaticon.com/512/387/387569.png">
+
+                <div class="typing-bubble">
+
+                    <span class="typing-dot"></span>
+                    <span class="typing-dot"></span>
+                    <span class="typing-dot"></span>
+
+                </div>
+
+            </div>
+        `);
+
+    });
+
+
+    /* ================= HELPERS ================= */
+
+    function getTime() {
+
+        const date = new Date();
+
+        let hour = date.getHours();
+
+        let minute = date.getMinutes();
+
+        minute = minute < 10 ? "0" + minute : minute;
+
+        let period = hour >= 12 ? "PM" : "AM";
+
+        hour = hour % 12;
+
+        hour = hour ? hour : 12;
+
+        return hour + ":" + minute + " " + period;
+
+    }
+
+
+    function scrollToBottom() {
+
+        var chatBody = document.getElementById("messageFormeight");
+
+        chatBody.scrollTop = chatBody.scrollHeight;
+
+    }
+
+
+    function escapeHtml(text) {
+
+        return $("<div>").text(text).html();
+
+    }
+
+});
+
+</script>
+
+</body>
+
 </html>
+
+
