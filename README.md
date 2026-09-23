@@ -1,5 +1,8 @@
 # Medical-ChatBot-GenAI
 Medical ChatBot GenAI is a web-based chatbot application that utilizes the power of OpenAI's GPT and Pinecone vector databases for advanced question-answering capabilities. It is designed to answer medical-related queries based on embedded document chunks. The chatbot leverages the langchain library to combine various AI components, making it a robust and scalable solution for the healthcare industry.
+
+<img width="1146" height="907" alt="image" src="https://github.com/user-attachments/assets/60af71f1-4904-4ff9-ba63-993742fb2811" />
+
 # Features
 Natural language processing (NLP) powered by OpenAI's GPT.
 Retrieval-Augmented Generation (RAG) for more accurate and context-aware answers.
